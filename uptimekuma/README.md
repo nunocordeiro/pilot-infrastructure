@@ -15,10 +15,16 @@ Monitor config backup for the Uptime Kuma instance on Pilot (HAOS add-on, `https
 
 ## Importing (recovery)
 
-After restoring from a HAOS snapshot, Uptime Kuma data is typically already restored.
-If recovering from scratch without a snapshot:
+After restoring from a HAOS snapshot, Uptime Kuma data is already restored — skip this.
 
+If recovering from scratch without a snapshot:
 1. Reinstall the Uptime Kuma add-on via HAOS Settings → Add-ons
 2. Open the add-on web UI
 3. Settings → Backup → Import → select `monitors.json`
-4. Re-enter any notification credentials (not included in the export)
+4. Re-enter redacted values:
+   - Notification → Telegram bot token (`telegramBotToken`)
+
+## Keeping in sync
+
+When monitor configs change, export from the UI (Settings → Backup → Export)
+and commit the updated `monitors.json`.
