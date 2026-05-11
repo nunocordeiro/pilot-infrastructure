@@ -1,0 +1,158 @@
+{
+	email nuno@cordeiro.pt
+	servers {
+		protocols h1 h2
+	}
+}
+
+# --- SHORT NAME REDIRECTS (HTTP ONLY) ---
+http://h, http://h.lan, http://h.tail357ab.ts.net, http://home.f, http://up.f, http://ha.f, http://outpost, http://up.o, http://c.f, http://c.o {
+	@h host h h.lan h.tail357ab.ts.net home.f
+	redir @h https://home.f.cordeiro.pt{uri}
+
+	@up-f host up.f
+	redir @up-f https://up.f.cordeiro.pt{uri}
+
+	@ha host ha.f
+	redir @ha https://ha.cordeiro.pt{uri}
+
+	@outpost host outpost
+	redir @outpost https://outpost.cordeiro.pt{uri}
+
+	@up-o host up.o
+	redir @up-o https://up.o.cordeiro.pt{uri}
+
+	@c-f host c.f
+	redir @c-f https://claude.f.cordeiro.pt{uri}
+
+	@c-o host c.o
+	redir @c-o https://claude.o.cordeiro.pt{uri}
+}
+
+# --- MAIN SECURE BLOCK ---
+cordeiro.pt, *.cordeiro.pt, f.cordeiro.pt, *.f.cordeiro.pt, *.o.cordeiro.pt {
+	tls {
+		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+	}
+
+	# --- FORT SERVICES (192.168.42.90) ---
+	@homepage host home.f.cordeiro.pt
+	handle @homepage {
+		reverse_proxy 192.168.42.90:3002
+	}
+
+	@plex host plex.f.cordeiro.pt
+	handle @plex {
+		reverse_proxy 192.168.42.90:32400
+	}
+
+	@qbt host qbt.f.cordeiro.pt
+	handle @qbt {
+		reverse_proxy 192.168.42.90:8080
+	}
+
+	@n8n host n8n.f.cordeiro.pt
+	handle @n8n {
+		reverse_proxy 192.168.42.90:5678
+	}
+
+	@paperless host paperless.f.cordeiro.pt
+	handle @paperless {
+		reverse_proxy 192.168.42.90:8000
+	}
+
+	@immich host photos.f.cordeiro.pt
+	handle @immich {
+		reverse_proxy 192.168.42.90:2283
+	}
+
+	@adguard-ui host adguard.f.cordeiro.pt
+	handle @adguard-ui {
+		reverse_proxy 192.168.42.90:3003
+	}
+
+	@dockhand host dockhand.f.cordeiro.pt
+	handle @dockhand {
+		reverse_proxy 192.168.42.90:3000
+	}
+
+	@fort-management host fort.cordeiro.pt vault.cordeiro.pt
+	handle @fort-management {
+		reverse_proxy 192.168.42.90:80
+	}
+
+	@holyclaude-f host claude.f.cordeiro.pt
+	handle @holyclaude-f {
+		reverse_proxy 192.168.42.90:3059
+	}
+
+	@arr host radarr.f.cordeiro.pt sonarr.f.cordeiro.pt prowlarr.f.cordeiro.pt
+	handle @arr {
+		@radarr host radarr.f.cordeiro.pt
+		reverse_proxy @radarr 192.168.42.90:7878
+
+		@sonarr host sonarr.f.cordeiro.pt
+		reverse_proxy @sonarr 192.168.42.90:8989
+
+		@prowlarr host prowlarr.f.cordeiro.pt
+		reverse_proxy @prowlarr 192.168.42.90:9696
+	}
+
+	# --- PILOT SERVICES (Localhost) ---
+	@ha host ha.cordeiro.pt
+	handle @ha {
+		reverse_proxy localhost:8123
+	}
+
+	@up-f host up.f.cordeiro.pt
+	handle @up-f {
+		reverse_proxy localhost:3001
+	}
+
+	# --- OUTPOST SERVICES (Tailscale) ---
+	@cam-fort host cam.f.cordeiro.pt
+	handle @cam-fort {
+		reverse_proxy https://192.168.42.90:8971 {
+			flush_interval -1
+			transport http {
+				tls_insecure_skip_verify
+			}
+		}
+	}
+
+	@cam-outpost host cam.o.cordeiro.pt
+	handle @cam-outpost {
+		reverse_proxy https://100.64.174.70:8971 {
+			flush_interval -1
+			transport http {
+				tls_insecure_skip_verify
+			}
+		}
+	}
+
+	@outpost host outpost.cordeiro.pt
+	handle @outpost {
+		reverse_proxy 100.64.174.70:80
+	}
+
+	@up-o host up.o.cordeiro.pt
+	handle @up-o {
+		reverse_proxy 100.64.174.70:3001
+	}
+
+	@holyclaude-o host claude.o.cordeiro.pt
+	handle @holyclaude-o {
+		reverse_proxy 100.64.174.70:3059
+	}
+
+	# --- SYNOLOGY (100.84.147.9) ---
+	@nas18 host nas.cordeiro.pt nas.f.cordeiro.pt nas18.f.cordeiro.pt synology.f.cordeiro.pt synology.cordeiro.pt
+	handle @nas18 {
+		reverse_proxy 100.84.147.9:5000
+	}
+
+	# --- FALLBACK ---
+	handle {
+		abort
+	}
+}
